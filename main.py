@@ -70,6 +70,24 @@ class Scraper:
         else:
             print("Nie znaleziono filmu.")
 
+    def filmweb(self):
+        self.title = validateTitle(self.title)
+        URL = "https://www.filmweb.pl/search?q=" + self.title
+        page = requests.get(URL)
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find("ul", class_="resultsList hits")
+        urlToMovie = results.find("a", class_="preview__link").attrs
+        URL = "https://www.filmweb.pl" + urlToMovie['href'] # STATYCZNA STRONA FILMU
+
+        page = requests.get(URL)
+        soup = BeautifulSoup(page.content, "html.parser")
+        results = soup.find("div", class_="filmRating filmRating--hasPanel").attrs
+        self.rating = str(round(float(results['data-rate']), 1))
+        self.votes = str(results['data-count'])
+        self.movieInfo = URL
+        self.showResults()
+
+
 #KLIENT
 
 title = input("Wprowadź tytuł filmu: (po angielsku): ")
@@ -79,4 +97,5 @@ scrap = Scraper(title)
 
 scrap.imdb()
 scrap.rottenTomatoes()
+scrap.filmweb()
 

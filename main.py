@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-
-
+import tkinter as tk
+from tkinter import filedialog, Text
 # https://www.imdb.com/search/title/?title=avatar:+the+way+of+water
 
 
@@ -102,10 +102,28 @@ class Scraper:
 
 # KLIENT
 
-title = input("Wprowadź tytuł filmu: (po angielsku): ")
+#title = input("Wprowadź tytuł filmu: (po angielsku): ")
 
-scrap = Scraper(title)
+#scrap = Scraper(title)
 
-scrap.imdb()
-scrap.rottenTomatoes()
-scrap.filmweb()
+#scrap.imdb()
+#scrap.rottenTomatoes()
+#scrap.filmweb()
+
+root = tk.Tk()
+
+canvas = tk.Canvas(root, height=700, width=700, bg="#263D42")
+canvas.pack()
+
+frame = tk.Frame(root, bg="white")
+frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
+
+startScraping = tk.Button(root, text="Pobierz oceny!", padx=10,
+                          pady=5, fg="white", bg="#263D42")
+startScraping.pack()
+
+saveInFile = tk.Button(root, text="Zapisz do pliku", padx=10,
+                          pady=5, fg="white", bg="#263D42")
+saveInFile.pack()
+
+root.mainloop()

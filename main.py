@@ -1,7 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
 import tkinter as tk
-from tkinter import filedialog, Text
 
 
 def validateTitle(str):
@@ -58,10 +57,9 @@ class Scraper:
                 for i in range(0, 5) or len(movies):
                     movieTitle = movies[i].find("img").attrs
                     movie = validateTitle(movieTitle['alt'])
-                    print(movie, self.title)
                     if movie == self.title:
                         numberOfMovie = i
-                        break # petla sluzy do znajdowania poprawnego filmu, rotten toamtoes sortuje od najpopularniejszego
+                        break  # petla sluzy do znajdowania poprawnego filmu, rotten toamtoes sortuje od najpopularniejszego
                 urlToMovie = movies[numberOfMovie].find("a", href=True)  # WYSZUKANIE SCIEZKI DO FILMU
 
                 URL = urlToMovie['href']
@@ -127,77 +125,104 @@ class Scraper:
 
 
 # KLIENT
-def scrapButton():
-    print(entryTitle.get(), "halo")
-    scrap = Scraper(entryTitle.get())
-    scrap.scrapCommand()
-    titleFrame.destroy()
-    imdbFrame.destroy()
-    rottenTomatoesFrame.destroy()
-    filmwebFrame.destroy()
-
-    newImdbFrame = tk.Frame(sitesFrame)
-    tk.Label(newImdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-    for message in scrap.messages[0]:
-        tk.Label(newImdbFrame, text=message, font=("Helvetica", 13,)).pack(padx=50, pady=20)
-    newImdbFrame.pack(side="left", fill='both', expand=True)
-
-    newRottenTomatoesFrame = tk.Frame(sitesFrame)
-    tk.Label(newRottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-    if scrap.messages:
-        for message in scrap.messages[1]:
-            tk.Label(newRottenTomatoesFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
-    newRottenTomatoesFrame.pack(side="left", fill='both', expand=True)
-
-    newFilmwebFrame = tk.Frame(sitesFrame)
-    tk.Label(newFilmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-    if scrap.messages:
-        for message in scrap.messages[2]:
-            tk.Label(newFilmwebFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
-    newFilmwebFrame.pack(side="left", fill='both', expand=True)
 
 
-root = tk.Tk()
+class App(tk.Tk):
+    messages = []
+    movieTitle = ""
 
-titleFrame = tk.Frame(root, bg="white")
-tk.Label(titleFrame, text="Wprowadź tytuł filmu: ", font=("Helvetica", 18)).pack(side='left')
-entryTitle = tk.Entry(titleFrame, width=30, font=("Helvetica", 15))
-entryTitle.pack(side="right")
-titleFrame.pack()
+    def __init__(self):
+        super().__init__()
 
-sitesFrame = tk.Frame(root, height=700)
+        titleFrame = tk.Frame(self, bg="white")
+        tk.Label(titleFrame, text="Wprowadź tytuł filmu: ", font=("Helvetica", 18)).pack(side='left')
+        entryTitle = tk.Entry(titleFrame, width=30, font=("Helvetica", 15))
+        entryTitle.pack(side="right")
+        titleFrame.pack()
 
-imdbFrame = tk.Frame(sitesFrame)
+        sitesFrame = tk.Frame(self, height=700)
 
-tk.Label(imdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-tk.Label(imdbFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(imdbFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(imdbFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        imdbFrame = tk.Frame(sitesFrame)
 
-imdbFrame.pack(side="left", fill='both', expand=True)
+        tk.Label(imdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+        tk.Label(imdbFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(imdbFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(imdbFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
 
-rottenTomatoesFrame = tk.Frame(sitesFrame)
-tk.Label(rottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-tk.Label(rottenTomatoesFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(rottenTomatoesFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(rottenTomatoesFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
-rottenTomatoesFrame.pack(side="left", fill='both', expand=True)
+        imdbFrame.pack(side="left", fill='both', expand=True)
 
-filmwebFrame = tk.Frame(sitesFrame)
-tk.Label(filmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
-tk.Label(filmwebFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(filmwebFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
-tk.Label(filmwebFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
-filmwebFrame.pack(side="left", fill='both', expand=True)
+        rottenTomatoesFrame = tk.Frame(sitesFrame)
+        tk.Label(rottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+        tk.Label(rottenTomatoesFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(rottenTomatoesFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(rottenTomatoesFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        rottenTomatoesFrame.pack(side="left", fill='both', expand=True)
 
-sitesFrame.pack(fill='both', expand=True)
+        filmwebFrame = tk.Frame(sitesFrame)
+        tk.Label(filmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+        tk.Label(filmwebFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(filmwebFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        tk.Label(filmwebFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+        filmwebFrame.pack(side="left", fill='both', expand=True)
 
-startScraping = tk.Button(root, text="Pobierz oceny!", padx=10,
-                          pady=5, fg="white", bg="#263D42", command=scrapButton)
-startScraping.pack()
+        sitesFrame.pack(fill='both', expand=True)
+        buttonFrame = tk.Frame(self)
 
-saveInFile = tk.Button(root, text="Zapisz do pliku", padx=10,
-                       pady=5, fg="white", bg="#263D42")
-saveInFile.pack()
+        button = tk.Button(buttonFrame, text="Pobierz oceny!", padx=10,
+                                  pady=5, fg="white", bg="#263D42", command=lambda: scrapButton())
+        button.pack(side='top')
 
-root.mainloop()
+        exitProgram = tk.Button(buttonFrame, text="Wyjscie", padx=10,
+                                pady=5, fg="white", bg="#263D42", command=lambda: exit())
+        exitProgram.pack(side='bottom')
+        buttonFrame.pack()
+
+        def scrapButton():
+            self.movieTitle = entryTitle.get()
+            scrap = Scraper(entryTitle.get())
+            scrap.scrapCommand()
+            titleFrame.destroy()
+            imdbFrame.destroy()
+            rottenTomatoesFrame.destroy()
+            filmwebFrame.destroy()
+            button.destroy()
+
+            newImdbFrame = tk.Frame(sitesFrame)
+            tk.Label(newImdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+            for message in scrap.messages[0]:
+                tk.Label(newImdbFrame, text=message, font=("Helvetica", 13,), state="active").pack(padx=50, pady=20)
+            newImdbFrame.pack(side="left", fill='both', expand=True)
+
+            newRottenTomatoesFrame = tk.Frame(sitesFrame)
+            tk.Label(newRottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50,
+                                                                                                          pady=20)
+            if scrap.messages:
+                for message in scrap.messages[1]:
+                    tk.Label(newRottenTomatoesFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
+            newRottenTomatoesFrame.pack(side="left", fill='both', expand=True)
+
+            newFilmwebFrame = tk.Frame(sitesFrame)
+            tk.Label(newFilmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+            if scrap.messages:
+                for message in scrap.messages[2]:
+                    tk.Label(newFilmwebFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
+            newFilmwebFrame.pack(side="left", fill='both', expand=True)
+            self.messages = scrap.messages
+
+            newButton = tk.Button(buttonFrame, text="Zapisz do pliku", padx=10,
+                                   pady=5, fg="white", bg="#263D42", command=lambda: saveToFile())
+            newButton.pack(side='top')
+
+        def saveToFile():
+            print(self.messages)
+            file = open(self.movieTitle + ".txt", 'w')
+            file.write(self.movieTitle)
+            for film in self.messages:
+                file.write('\n')
+                for el in film:
+                    file.write(el + '\n')
+
+
+
+app = App()
+app.mainloop()

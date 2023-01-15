@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import tkinter as tk
 from tkinter import filedialog, Text
-# https://www.imdb.com/search/title/?title=avatar:+the+way+of+water
 
 
 def validateTitle(str):
@@ -14,13 +13,10 @@ class Scraper:
     votes = ""
     movieInfo = ""
     title = ""
+    messages = []
 
     def __init__(self, title):
         self.title = title
-
-    def showResults(self):
-        print(self.rating + "/10 - " + self.votes)
-        print(self.movieInfo)
 
     def imdb(self):
         try:
@@ -39,11 +35,15 @@ class Scraper:
                 self.rating = str(onlyRating)
                 self.movieInfo = "https://www.imdb.com" + foundMovie['href']
                 self.votes = onlyVotes.text
-                self.showResults()
+                self.saveResults(self.rating, self.votes, self.movieInfo)
             else:
-                print("Nie znaleziono filmu.")
+                message = "Nie znaleziono filmu."
+                self.errorMessage(message)
+                print(message)
         except:
-            print("Wykryto błąd.")
+            message = "Wykryto błąd."
+            self.errorMessage(message)
+            print(message)
 
     def rottenTomatoes(self):
         try:
@@ -54,7 +54,15 @@ class Scraper:
             results = soup.find(id="search-results")
             if results is not None:
                 movies = results.find_all("search-page-media-row")
-                urlToMovie = movies[0].find("a", href=True)  # WYSZUKANIE SCIEZKI DO FILMU
+                numberOfMovie = 0
+                for i in range(0, 5) or len(movies):
+                    movieTitle = movies[i].find("img").attrs
+                    movie = validateTitle(movieTitle['alt'])
+                    print(movie, self.title)
+                    if movie == self.title:
+                        numberOfMovie = i
+                        break # petla sluzy do znajdowania poprawnego filmu, rotten toamtoes sortuje od najpopularniejszego
+                urlToMovie = movies[numberOfMovie].find("a", href=True)  # WYSZUKANIE SCIEZKI DO FILMU
 
                 URL = urlToMovie['href']
                 page = requests.get(URL)
@@ -73,11 +81,15 @@ class Scraper:
                         break
                 self.votes = votes
                 self.movieInfo = urlToMovie['href']
-                self.showResults()
+                self.saveResults(self.rating, self.votes, self.movieInfo)
             else:
-                print("Nie znaleziono filmu.")
+                message = "Nie znaleziono filmu."
+                self.errorMessage(message)
+                print(message)
         except:
-            print("Wykryto błąd.")
+            message = "Wykryto błąd."
+            self.errorMessage(message)
+            print(message)
 
     def filmweb(self):
         try:
@@ -95,35 +107,97 @@ class Scraper:
             self.rating = str(round(float(results['data-rate']), 1))
             self.votes = str(results['data-count'])
             self.movieInfo = URL
-            self.showResults()
+            self.saveResults(self.rating, self.votes, self.movieInfo)
         except:
-            print("Wykryto błąd.")
+            message = "Wykryto błąd."
+            self.errorMessage(message)
+            print(message)
+
+    def scrapCommand(self):
+        self.imdb()
+        self.rottenTomatoes()
+        self.filmweb()
+
+    def saveResults(self, rating, votes, movieInfo):
+        self.messages.append(["Ocena: " + rating + "/10", "Ilość ocen: " + votes.replace(",", ""), movieInfo])
+        print("Ocena: " + rating + "/10", "Ilość ocen: " + votes, movieInfo)
+
+    def errorMessage(self, message):
+        self.messages.append([message])
 
 
 # KLIENT
+def scrapButton():
+    print(entryTitle.get(), "halo")
+    scrap = Scraper(entryTitle.get())
+    scrap.scrapCommand()
+    titleFrame.destroy()
+    imdbFrame.destroy()
+    rottenTomatoesFrame.destroy()
+    filmwebFrame.destroy()
 
-#title = input("Wprowadź tytuł filmu: (po angielsku): ")
+    newImdbFrame = tk.Frame(sitesFrame)
+    tk.Label(newImdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+    for message in scrap.messages[0]:
+        tk.Label(newImdbFrame, text=message, font=("Helvetica", 13,)).pack(padx=50, pady=20)
+    newImdbFrame.pack(side="left", fill='both', expand=True)
 
-#scrap = Scraper(title)
+    newRottenTomatoesFrame = tk.Frame(sitesFrame)
+    tk.Label(newRottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+    if scrap.messages:
+        for message in scrap.messages[1]:
+            tk.Label(newRottenTomatoesFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
+    newRottenTomatoesFrame.pack(side="left", fill='both', expand=True)
 
-#scrap.imdb()
-#scrap.rottenTomatoes()
-#scrap.filmweb()
+    newFilmwebFrame = tk.Frame(sitesFrame)
+    tk.Label(newFilmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+    if scrap.messages:
+        for message in scrap.messages[2]:
+            tk.Label(newFilmwebFrame, text=message, font=("Helvetica", 13)).pack(padx=50, pady=20)
+    newFilmwebFrame.pack(side="left", fill='both', expand=True)
+
 
 root = tk.Tk()
 
-canvas = tk.Canvas(root, height=700, width=700, bg="#263D42")
-canvas.pack()
+titleFrame = tk.Frame(root, bg="white")
+tk.Label(titleFrame, text="Wprowadź tytuł filmu: ", font=("Helvetica", 18)).pack(side='left')
+entryTitle = tk.Entry(titleFrame, width=30, font=("Helvetica", 15))
+entryTitle.pack(side="right")
+titleFrame.pack()
 
-frame = tk.Frame(root, bg="white")
-frame.place(relwidth=0.8, relheight=0.8, relx=0.1, rely=0.1)
+sitesFrame = tk.Frame(root, height=700)
+
+imdbFrame = tk.Frame(sitesFrame)
+
+tk.Label(imdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+tk.Label(imdbFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(imdbFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(imdbFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+
+imdbFrame.pack(side="left", fill='both', expand=True)
+
+rottenTomatoesFrame = tk.Frame(sitesFrame)
+tk.Label(rottenTomatoesFrame, text="Rotten Tomatoes", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+tk.Label(rottenTomatoesFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(rottenTomatoesFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(rottenTomatoesFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+rottenTomatoesFrame.pack(side="left", fill='both', expand=True)
+
+filmwebFrame = tk.Frame(sitesFrame)
+tk.Label(filmwebFrame, text="Filmweb", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
+tk.Label(filmwebFrame, text="Ocena: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(filmwebFrame, text="Ilość ocen: N/A", font=("Helvetica", 13,)).pack(pady=20)
+tk.Label(filmwebFrame, text="Link do filmu: N/A", font=("Helvetica", 13,)).pack(pady=20)
+filmwebFrame.pack(side="left", fill='both', expand=True)
+
+sitesFrame.pack(fill='both', expand=True)
 
 startScraping = tk.Button(root, text="Pobierz oceny!", padx=10,
-                          pady=5, fg="white", bg="#263D42")
+                          pady=5, fg="white", bg="#263D42", command=scrapButton)
 startScraping.pack()
 
 saveInFile = tk.Button(root, text="Zapisz do pliku", padx=10,
-                          pady=5, fg="white", bg="#263D42")
+                       pady=5, fg="white", bg="#263D42")
 saveInFile.pack()
 
 root.mainloop()

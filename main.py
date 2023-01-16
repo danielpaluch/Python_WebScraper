@@ -140,7 +140,7 @@ class App(tk.Tk):
         entryTitle.pack(side="right")
         titleFrame.pack()
 
-        sitesFrame = tk.Frame(self, height=700)
+        sitesFrame = tk.Frame(self)
 
         imdbFrame = tk.Frame(sitesFrame)
 
@@ -168,11 +168,11 @@ class App(tk.Tk):
         sitesFrame.pack(fill='both', expand=True)
         buttonFrame = tk.Frame(self)
 
-        button = tk.Button(buttonFrame, text="Pobierz oceny!", padx=10,
+        button = tk.Button(buttonFrame, text="Pobierz oceny!", padx=10, width=20,
                                   pady=5, fg="white", bg="#263D42", command=lambda: scrapButton())
         button.pack(side='top')
 
-        exitProgram = tk.Button(buttonFrame, text="Wyjscie", padx=10,
+        exitProgram = tk.Button(buttonFrame, text="Wyjscie", padx=10, width=20,
                                 pady=5, fg="white", bg="#263D42", command=lambda: exit())
         exitProgram.pack(side='bottom')
         buttonFrame.pack()
@@ -185,7 +185,7 @@ class App(tk.Tk):
             imdbFrame.destroy()
             rottenTomatoesFrame.destroy()
             filmwebFrame.destroy()
-            button.destroy()
+            button.destroy()        #USUNIECIE WYSWIETLENIA STARYCH DANYCH
 
             newImdbFrame = tk.Frame(sitesFrame)
             tk.Label(newImdbFrame, text="IMDB", font=("Helvetica", 20, "bold")).pack(padx=50, pady=20)
@@ -209,7 +209,7 @@ class App(tk.Tk):
             newFilmwebFrame.pack(side="left", fill='both', expand=True)
             self.messages = scrap.messages
 
-            newButton = tk.Button(buttonFrame, text="Zapisz do pliku", padx=10,
+            newButton = tk.Button(buttonFrame, text="Zapisz do pliku", padx=10, width=20,
                                    pady=5, fg="white", bg="#263D42", command=lambda: saveToFile())
             newButton.pack(side='top')
 
